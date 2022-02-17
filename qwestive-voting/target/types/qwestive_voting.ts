@@ -6,7 +6,7 @@ export type QwestiveVoting = {
       "name": "initializeVoting",
       "accounts": [
         {
-          "name": "baseAccount",
+          "name": "communityVoteAccount",
           "isMut": true,
           "isSigner": true
         },
@@ -27,7 +27,7 @@ export type QwestiveVoting = {
       "name": "addProposal",
       "accounts": [
         {
-          "name": "baseAccount",
+          "name": "communityVoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -112,7 +112,7 @@ export type QwestiveVoting = {
   ],
   "accounts": [
     {
-      "name": "baseAccount",
+      "name": "communityVoteAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -137,7 +137,7 @@ export type QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "createdAt",
+            "name": "createdTimestamp",
             "type": "i64"
           },
           {
@@ -177,7 +177,7 @@ export type QwestiveVoting = {
             "type": "u64"
           },
           {
-            "name": "vote",
+            "name": "voteBool",
             "type": "bool"
           },
           {
@@ -185,7 +185,7 @@ export type QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "createdAt",
+            "name": "createdTimestamp",
             "type": "i64"
           },
           {
@@ -219,8 +219,38 @@ export type QwestiveVoting = {
     },
     {
       "code": 6004,
+      "name": "InvalidVotingType",
+      "msg": "The weight voting type is not a valid option"
+    },
+    {
+      "code": 6005,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
+    },
+    {
+      "code": 6006,
+      "name": "InsufficientTokensToVote",
+      "msg": "Insufficient number of tokens to be included in voting session"
+    },
+    {
+      "code": 6007,
+      "name": "VoteAccountAlreadyTallied",
+      "msg": "This voting account has already been tallied"
+    },
+    {
+      "code": 6008,
+      "name": "TallyHasEnded",
+      "msg": "The timing window for when the tally has ended"
+    },
+    {
+      "code": 6009,
+      "name": "ProposalIsFinalized",
+      "msg": "This proposal has already been finalized and no changes can be made"
+    },
+    {
+      "code": 6010,
+      "name": "TooManyCandidates",
+      "msg": "The number of candidates has exceeded the allowed amount for vote options"
     }
   ]
 };
@@ -233,7 +263,7 @@ export const IDL: QwestiveVoting = {
       "name": "initializeVoting",
       "accounts": [
         {
-          "name": "baseAccount",
+          "name": "communityVoteAccount",
           "isMut": true,
           "isSigner": true
         },
@@ -254,7 +284,7 @@ export const IDL: QwestiveVoting = {
       "name": "addProposal",
       "accounts": [
         {
-          "name": "baseAccount",
+          "name": "communityVoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -339,7 +369,7 @@ export const IDL: QwestiveVoting = {
   ],
   "accounts": [
     {
-      "name": "baseAccount",
+      "name": "communityVoteAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -364,7 +394,7 @@ export const IDL: QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "createdAt",
+            "name": "createdTimestamp",
             "type": "i64"
           },
           {
@@ -404,7 +434,7 @@ export const IDL: QwestiveVoting = {
             "type": "u64"
           },
           {
-            "name": "vote",
+            "name": "voteBool",
             "type": "bool"
           },
           {
@@ -412,7 +442,7 @@ export const IDL: QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "createdAt",
+            "name": "createdTimestamp",
             "type": "i64"
           },
           {
@@ -446,8 +476,38 @@ export const IDL: QwestiveVoting = {
     },
     {
       "code": 6004,
+      "name": "InvalidVotingType",
+      "msg": "The weight voting type is not a valid option"
+    },
+    {
+      "code": 6005,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
+    },
+    {
+      "code": 6006,
+      "name": "InsufficientTokensToVote",
+      "msg": "Insufficient number of tokens to be included in voting session"
+    },
+    {
+      "code": 6007,
+      "name": "VoteAccountAlreadyTallied",
+      "msg": "This voting account has already been tallied"
+    },
+    {
+      "code": 6008,
+      "name": "TallyHasEnded",
+      "msg": "The timing window for when the tally has ended"
+    },
+    {
+      "code": 6009,
+      "name": "ProposalIsFinalized",
+      "msg": "This proposal has already been finalized and no changes can be made"
+    },
+    {
+      "code": 6010,
+      "name": "TooManyCandidates",
+      "msg": "The number of candidates has exceeded the allowed amount for vote options"
     }
   ]
 };

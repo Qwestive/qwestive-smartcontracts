@@ -13,7 +13,7 @@ describe("qwestive-voting", () => {
   const program = anchor.workspace.QwestiveVoting as Program<QwestiveVoting>;
 
   // The Account to create.
-  const baseAccount = anchor.web3.Keypair.generate();
+  const communityVoteAccount = anchor.web3.Keypair.generate();
   const DAY_IN_UNIX = 24 * 60 * 60 * 1000;
 
   const getNumberBuffer = (total: number, alloc = 8) => {
@@ -35,22 +35,22 @@ describe("qwestive-voting", () => {
     // Add your test here.
     const tx = await program.rpc.initializeVoting({
       accounts: {
-        baseAccount: baseAccount.publicKey,
+        communityVoteAccount: communityVoteAccount.publicKey,
         user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
-      signers: [baseAccount],
+      signers: [communityVoteAccount],
     });
 
-    const account = await program.account.baseAccount.fetch(
-      baseAccount.publicKey
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
     );
     assert.equal(account.totalProposalCount, 0);
   });
 
   it("Can add a proposal!", async () => {
-    const account = await program.account.baseAccount.fetch(
-      baseAccount.publicKey
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
     );
     console.log("Your account", account);
     const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
@@ -68,7 +68,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(+new Date() + 1 * DAY_IN_UNIX),
       {
         accounts: {
-          baseAccount: baseAccount.publicKey,
+          communityVoteAccount: communityVoteAccount.publicKey,
           proposal: proposalAccountPublicKey,
           user: provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
@@ -78,8 +78,8 @@ describe("qwestive-voting", () => {
   });
 
   it("Can add a  second proposal!", async () => {
-    let account = await program.account.baseAccount.fetch(
-      baseAccount.publicKey
+    let account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
     );
 
     const secondProposalId = getNumberBuffer(
@@ -101,7 +101,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(+new Date() + 2 * DAY_IN_UNIX),
       {
         accounts: {
-          baseAccount: baseAccount.publicKey,
+          communityVoteAccount: communityVoteAccount.publicKey,
           proposal: secondProposalAccountPublicKey,
           user: provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
@@ -109,7 +109,7 @@ describe("qwestive-voting", () => {
       }
     );
 
-    account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+    account = await program.account.communityVoteAccount.fetch(communityVoteAccount.publicKey);
 
     const proposals = await program.account.proposal.all();
     assert.ok(proposals.length === account.totalProposalCount.toNumber());
@@ -142,8 +142,8 @@ describe("qwestive-voting", () => {
     });
     const vote = await program.account.vote.all();
     assert.equal(vote.length, 1);
-    const account = await program.account.baseAccount.fetch(
-      baseAccount.publicKey
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
     );
     assert.ok(account.totalProposalCount.toNumber() === 2);
   });
@@ -354,7 +354,7 @@ describe("qwestive-voting", () => {
     const allVotes = await program.account.vote.all();
     assert.equal(allVotes.length, 4);
     assert.equal(proposalOneYesVotes.length, 1);
-    assert.ok(proposalOneYesVotes[0].account.vote === true);
+    assert.ok(proposalOneYesVotes[0].account.voteBool === true);
   });
 
   it("We can filter votes which is no", async () => {
@@ -369,6 +369,6 @@ describe("qwestive-voting", () => {
       },
     ]);
     assert.equal(proposalOneNoVotes.length, 1);
-    assert.ok(proposalOneNoVotes[0].account.vote === false);
+    assert.ok(proposalOneNoVotes[0].account.voteBool === false);
   });
 });

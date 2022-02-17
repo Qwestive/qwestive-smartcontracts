@@ -10,7 +10,7 @@ yarn dev
 
 ## Deploying the Smart Contract. 
 ```bash
-cd anchor-voting
+cd qwestive-voting
 anchor build
 anchor test
 anchor deploy
@@ -21,7 +21,7 @@ in base directory.
     yarn copy-idl
 ```
 
-### Creating New Keypair for BaseAccount
+### Creating New Keypair for CommunityVoteAccount
 Base Account needs to be created after deploying the smart contract. in order to create a new keypair, run the following command:
 ```bash
     yarn generate-keypair
