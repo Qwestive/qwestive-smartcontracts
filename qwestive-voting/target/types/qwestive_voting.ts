@@ -11,6 +11,16 @@ export type QwestiveVoting = {
           "isSigner": true
         },
         {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "user",
           "isMut": true,
           "isSigner": true
@@ -21,7 +31,12 @@ export type QwestiveVoting = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "minimumTokens",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "addProposal",
@@ -33,6 +48,11 @@ export type QwestiveVoting = {
         },
         {
           "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -65,7 +85,27 @@ export type QwestiveVoting = {
           "type": "string"
         },
         {
-          "name": "endTimeStamp",
+          "name": "minimumTokenCount",
+          "type": "u64"
+        },
+        {
+          "name": "voteSystemType",
+          "type": "u8"
+        },
+        {
+          "name": "threshold",
+          "type": "u64"
+        },
+        {
+          "name": "votingType",
+          "type": "u8"
+        },
+        {
+          "name": "votingEndTimestamp",
+          "type": "u128"
+        },
+        {
+          "name": "finalizeVoteEndTimestamp",
           "type": "u128"
         }
       ]
@@ -74,12 +114,22 @@ export type QwestiveVoting = {
       "name": "voteForProposal",
       "accounts": [
         {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "proposal",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -104,8 +154,12 @@ export type QwestiveVoting = {
           "type": "u64"
         },
         {
-          "name": "vote",
+          "name": "voteBool",
           "type": "bool"
+        },
+        {
+          "name": "candidate",
+          "type": "u8"
         }
       ]
     }
@@ -118,6 +172,14 @@ export type QwestiveVoting = {
         "fields": [
           {
             "name": "totalProposalCount",
+            "type": "u64"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "minimumTokenCount",
             "type": "u64"
           }
         ]
@@ -149,6 +211,26 @@ export type QwestiveVoting = {
             "type": "string"
           },
           {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "minimumTokenCount",
+            "type": "u64"
+          },
+          {
+            "name": "voteSystemType",
+            "type": "u8"
+          },
+          {
+            "name": "threshold",
+            "type": "u64"
+          },
+          {
+            "name": "votingType",
+            "type": "u8"
+          },
+          {
             "name": "voteYes",
             "type": "u64"
           },
@@ -157,11 +239,27 @@ export type QwestiveVoting = {
             "type": "u64"
           },
           {
+            "name": "totalVotes",
+            "type": "u64"
+          },
+          {
+            "name": "votingFinalized",
+            "type": "bool"
+          },
+          {
+            "name": "invalidProposal",
+            "type": "bool"
+          },
+          {
             "name": "bump",
             "type": "u8"
           },
           {
-            "name": "endTimeStamp",
+            "name": "votingEndTimestamp",
+            "type": "u128"
+          },
+          {
+            "name": "finalizeVoteEndTimestamp",
             "type": "u128"
           }
         ]
@@ -181,8 +279,24 @@ export type QwestiveVoting = {
             "type": "bool"
           },
           {
+            "name": "candidate",
+            "type": "u8"
+          },
+          {
+            "name": "voterWeight",
+            "type": "u64"
+          },
+          {
             "name": "voter",
             "type": "publicKey"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "tallyCompleted",
+            "type": "bool"
           },
           {
             "name": "createdTimestamp",
@@ -204,53 +318,93 @@ export type QwestiveVoting = {
     },
     {
       "code": 6001,
+      "name": "ProposalIDMismatch",
+      "msg": "The requested proposal id does not match the proposal account"
+    },
+    {
+      "code": 6002,
       "name": "YouAlreadyVotedForThisProposal",
       "msg": "You have already voted for this proposal"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "TitleIsTooLong",
       "msg": "Title is too long. maximum: 80 character"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "DescriptionIsTooLong",
       "msg": "Description is too long. maximum: 1024 character"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "InvalidVotingType",
       "msg": "The weight voting type is not a valid option"
     },
     {
-      "code": 6005,
+      "code": 6006,
+      "name": "InvalidVotingSystemType",
+      "msg": "The voting system type is not a valid option"
+    },
+    {
+      "code": 6007,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
     },
     {
-      "code": 6006,
+      "code": 6008,
+      "name": "ProposalVotingFinalized",
+      "msg": "Proposal voting is finalized no changes can be made"
+    },
+    {
+      "code": 6009,
+      "name": "VotingEndTimestampTooSmall",
+      "msg": "The timestamp of voting end must be greater than the current timestamp"
+    },
+    {
+      "code": 6010,
+      "name": "FinalizeTimestampTooSmall",
+      "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
+    },
+    {
+      "code": 6011,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6007,
+      "code": 6012,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6008,
+      "code": 6013,
       "name": "TallyHasEnded",
       "msg": "The timing window for when the tally has ended"
     },
     {
-      "code": 6009,
+      "code": 6014,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6010,
+      "code": 6015,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidTokenAccount",
+      "msg": "The token account is not the correct mint"
+    },
+    {
+      "code": 6017,
+      "name": "InsufficientTokenBalance",
+      "msg": "The token account balance is less than the required balance for the community"
+    },
+    {
+      "code": 6018,
+      "name": "UnauthorizedTokenHolder",
+      "msg": "The user is not the owner of the token account"
     }
   ]
 };
@@ -268,6 +422,16 @@ export const IDL: QwestiveVoting = {
           "isSigner": true
         },
         {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "user",
           "isMut": true,
           "isSigner": true
@@ -278,7 +442,12 @@ export const IDL: QwestiveVoting = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "minimumTokens",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "addProposal",
@@ -290,6 +459,11 @@ export const IDL: QwestiveVoting = {
         },
         {
           "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -322,7 +496,27 @@ export const IDL: QwestiveVoting = {
           "type": "string"
         },
         {
-          "name": "endTimeStamp",
+          "name": "minimumTokenCount",
+          "type": "u64"
+        },
+        {
+          "name": "voteSystemType",
+          "type": "u8"
+        },
+        {
+          "name": "threshold",
+          "type": "u64"
+        },
+        {
+          "name": "votingType",
+          "type": "u8"
+        },
+        {
+          "name": "votingEndTimestamp",
+          "type": "u128"
+        },
+        {
+          "name": "finalizeVoteEndTimestamp",
           "type": "u128"
         }
       ]
@@ -331,12 +525,22 @@ export const IDL: QwestiveVoting = {
       "name": "voteForProposal",
       "accounts": [
         {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "proposal",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -361,8 +565,12 @@ export const IDL: QwestiveVoting = {
           "type": "u64"
         },
         {
-          "name": "vote",
+          "name": "voteBool",
           "type": "bool"
+        },
+        {
+          "name": "candidate",
+          "type": "u8"
         }
       ]
     }
@@ -375,6 +583,14 @@ export const IDL: QwestiveVoting = {
         "fields": [
           {
             "name": "totalProposalCount",
+            "type": "u64"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "minimumTokenCount",
             "type": "u64"
           }
         ]
@@ -406,6 +622,26 @@ export const IDL: QwestiveVoting = {
             "type": "string"
           },
           {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "minimumTokenCount",
+            "type": "u64"
+          },
+          {
+            "name": "voteSystemType",
+            "type": "u8"
+          },
+          {
+            "name": "threshold",
+            "type": "u64"
+          },
+          {
+            "name": "votingType",
+            "type": "u8"
+          },
+          {
             "name": "voteYes",
             "type": "u64"
           },
@@ -414,11 +650,27 @@ export const IDL: QwestiveVoting = {
             "type": "u64"
           },
           {
+            "name": "totalVotes",
+            "type": "u64"
+          },
+          {
+            "name": "votingFinalized",
+            "type": "bool"
+          },
+          {
+            "name": "invalidProposal",
+            "type": "bool"
+          },
+          {
             "name": "bump",
             "type": "u8"
           },
           {
-            "name": "endTimeStamp",
+            "name": "votingEndTimestamp",
+            "type": "u128"
+          },
+          {
+            "name": "finalizeVoteEndTimestamp",
             "type": "u128"
           }
         ]
@@ -438,8 +690,24 @@ export const IDL: QwestiveVoting = {
             "type": "bool"
           },
           {
+            "name": "candidate",
+            "type": "u8"
+          },
+          {
+            "name": "voterWeight",
+            "type": "u64"
+          },
+          {
             "name": "voter",
             "type": "publicKey"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "tallyCompleted",
+            "type": "bool"
           },
           {
             "name": "createdTimestamp",
@@ -461,53 +729,93 @@ export const IDL: QwestiveVoting = {
     },
     {
       "code": 6001,
+      "name": "ProposalIDMismatch",
+      "msg": "The requested proposal id does not match the proposal account"
+    },
+    {
+      "code": 6002,
       "name": "YouAlreadyVotedForThisProposal",
       "msg": "You have already voted for this proposal"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "TitleIsTooLong",
       "msg": "Title is too long. maximum: 80 character"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "DescriptionIsTooLong",
       "msg": "Description is too long. maximum: 1024 character"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "InvalidVotingType",
       "msg": "The weight voting type is not a valid option"
     },
     {
-      "code": 6005,
+      "code": 6006,
+      "name": "InvalidVotingSystemType",
+      "msg": "The voting system type is not a valid option"
+    },
+    {
+      "code": 6007,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
     },
     {
-      "code": 6006,
+      "code": 6008,
+      "name": "ProposalVotingFinalized",
+      "msg": "Proposal voting is finalized no changes can be made"
+    },
+    {
+      "code": 6009,
+      "name": "VotingEndTimestampTooSmall",
+      "msg": "The timestamp of voting end must be greater than the current timestamp"
+    },
+    {
+      "code": 6010,
+      "name": "FinalizeTimestampTooSmall",
+      "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
+    },
+    {
+      "code": 6011,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6007,
+      "code": 6012,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6008,
+      "code": 6013,
       "name": "TallyHasEnded",
       "msg": "The timing window for when the tally has ended"
     },
     {
-      "code": 6009,
+      "code": 6014,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6010,
+      "code": 6015,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidTokenAccount",
+      "msg": "The token account is not the correct mint"
+    },
+    {
+      "code": 6017,
+      "name": "InsufficientTokenBalance",
+      "msg": "The token account balance is less than the required balance for the community"
+    },
+    {
+      "code": 6018,
+      "name": "UnauthorizedTokenHolder",
+      "msg": "The user is not the owner of the token account"
     }
   ]
 };

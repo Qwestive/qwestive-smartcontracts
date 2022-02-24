@@ -1,7 +1,7 @@
 [package]
 name = "qwestive-voting"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Qwestive Voting"
 edition = "2018"
 
 [lib]
@@ -18,3 +18,4 @@ default = []
 [dependencies]
 anchor-lang = "0.20.1"
 anchor-spl = {version = "0.20.1"}
+spl-token = { version = "3.1.1", features = ["no-entrypoint"] }
