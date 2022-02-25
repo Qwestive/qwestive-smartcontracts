@@ -11,11 +11,6 @@
           "isSigner": true
         },
         {
-          "name": "mint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
@@ -162,6 +157,109 @@
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "beginTally",
+      "accounts": [
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "tallyVote",
+      "accounts": [
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "finalizeVote",
+      "accounts": [
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -243,11 +341,19 @@
             "type": "u64"
           },
           {
+            "name": "totalTally",
+            "type": "u64"
+          },
+          {
+            "name": "tallyStarted",
+            "type": "bool"
+          },
+          {
             "name": "votingFinalized",
             "type": "bool"
           },
           {
-            "name": "invalidProposal",
+            "name": "proposalTallyMismatch",
             "type": "bool"
           },
           {
@@ -358,53 +464,83 @@
     },
     {
       "code": 6009,
+      "name": "VotingTimeHasNotEnded",
+      "msg": "The voting time has not ended"
+    },
+    {
+      "code": 6010,
+      "name": "FinalizeVoteTimeHasNotEnded",
+      "msg": "The time for tallying votes has not ended wait until tally time has ended"
+    },
+    {
+      "code": 6011,
       "name": "VotingEndTimestampTooSmall",
       "msg": "The timestamp of voting end must be greater than the current timestamp"
     },
     {
-      "code": 6010,
+      "code": 6012,
       "name": "FinalizeTimestampTooSmall",
       "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
     },
     {
-      "code": 6011,
+      "code": 6013,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6012,
+      "code": 6014,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6013,
-      "name": "TallyHasEnded",
-      "msg": "The timing window for when the tally has ended"
+      "code": 6015,
+      "name": "ProposalTallyAlreadyStarted",
+      "msg": "The proposal tally has already started"
     },
     {
-      "code": 6014,
+      "code": 6016,
+      "name": "TallyHasNotStarted",
+      "msg": "Vote tally has not started tally must begin before tallying vote"
+    },
+    {
+      "code": 6017,
+      "name": "TallyHasStarted",
+      "msg": "Vote tally has started no new votes can be submitted"
+    },
+    {
+      "code": 6018,
+      "name": "TallyHasEnded",
+      "msg": "The timing window for any vote tally has ended"
+    },
+    {
+      "code": 6019,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6015,
+      "code": 6020,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
     },
     {
-      "code": 6016,
+      "code": 6021,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6017,
+      "code": 6022,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6018,
+      "code": 6023,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
+    },
+    {
+      "code": 6024,
+      "name": "UnauthorizedAccount",
+      "msg": "The account provided is not owned by the Qwestive Voting program"
     }
   ],
   "metadata": {

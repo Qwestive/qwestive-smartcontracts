@@ -18,21 +18,28 @@ describe("qwestive-voting", () => {
 
   // The mint token and the voteTokenAccount
   let mintA: Token = null;
+  let mintB: Token = null;
+
   let voter1TokenAAccount: PublicKey = null;
   let voter1TokenBAccount: PublicKey = null;
+  let voter2TokenAAccount: PublicKey = null;
+  let voter2TokenBAccount: PublicKey = null;
   let voter3TokenAAccount: PublicKey = null;
 
-  let mintB: Token = null;
-  let voter2TokenBAccount: PublicKey = null;
-  
   // Mint Authority
   const mintAuthority = anchor.web3.Keypair.generate();
   const mintBAuthority = anchor.web3.Keypair.generate();
 
+  // Token amount to mint
+  const voter1TokenAAmountOwned = 500;
+  const voter1TokenBAmountOwned = 100;
+  const voter2TokenAAmountOwned = 250;
+  const voter2TokenBAmountOwned = 200;
+  const voter3TokenAAmountOwned = 1;
+
   // The token account
   const tokenWallet = anchor.web3.Keypair.generate();
-  const tokenAmountOwned = 500;
-
+  // Second token wallet holder
   const secondTokenWallet = anchor.web3.Keypair.generate();
 
   // The Account to create.
@@ -70,37 +77,51 @@ describe("qwestive-voting", () => {
       TOKEN_PROGRAM_ID
     );
 
+    // Primary Provider Token Accounts
     voter1TokenAAccount = await mintA.createAccount(provider.wallet.publicKey);
     voter1TokenBAccount = await mintB.createAccount(provider.wallet.publicKey);
-    voter2TokenBAccount = await mintB.createAccount(secondTokenWallet.publicKey);
-    voter3TokenAAccount = await mintA.createAccount(provider.wallet.publicKey);
+
+
+    // First Token Wallet Holder Token Accounts
+    voter2TokenAAccount = await mintA.createAccount(tokenWallet.publicKey);
+    voter2TokenBAccount = await mintB.createAccount(tokenWallet.publicKey);
+    
+    // Second Token Wallet Holder Token Acccount
+    voter3TokenAAccount = await mintA.createAccount(secondTokenWallet.publicKey);
 
     await mintA.mintTo(
       voter1TokenAAccount,
       mintAuthority.publicKey,
       [mintAuthority],
-      tokenAmountOwned
+      voter1TokenAAmountOwned
+    );
+
+    await mintA.mintTo(
+      voter2TokenAAccount,
+      mintAuthority.publicKey,
+      [mintAuthority],
+      voter2TokenAAmountOwned
     );
 
     await mintA.mintTo(
       voter3TokenAAccount,
       mintAuthority.publicKey,
       [mintAuthority],
-      1
+      voter3TokenAAmountOwned
     );
 
     await mintB.mintTo(
       voter1TokenBAccount,
       mintBAuthority.publicKey,
       [mintBAuthority],
-      100
+      voter1TokenBAmountOwned
     );
 
     await mintB.mintTo(
       voter2TokenBAccount,
       mintBAuthority.publicKey,
       [mintBAuthority],
-      200
+      voter2TokenBAmountOwned
     );
 
     let _voter1TokenAAccount = await mintA.getAccountInfo(
@@ -111,6 +132,10 @@ describe("qwestive-voting", () => {
       voter1TokenBAccount
     );
 
+    let _voter2TokenAAccount = await mintA.getAccountInfo(
+      voter2TokenAAccount
+    );
+
     let _voter2TokenBAccount= await mintB.getAccountInfo(
       voter2TokenBAccount
     );
@@ -119,10 +144,11 @@ describe("qwestive-voting", () => {
       voter3TokenAAccount
     );
 
-     assert.ok(_voter1TokenAAccount.amount.toNumber() == tokenAmountOwned);
-     assert.ok(_voter1TokenBAccount.amount.toNumber() == 100);
-     assert.ok(_voter2TokenBAccount.amount.toNumber() == 200);
-     assert.ok(_voter3TokenAAccount.amount.toNumber() == 1);
+     assert.ok(_voter1TokenAAccount.amount.toNumber() == voter1TokenAAmountOwned);
+     assert.ok(_voter1TokenBAccount.amount.toNumber() == voter1TokenBAmountOwned);
+     assert.ok(_voter2TokenAAccount.amount.toNumber() == voter2TokenAAmountOwned);
+     assert.ok(_voter2TokenBAccount.amount.toNumber() == voter2TokenBAmountOwned);
+     assert.ok(_voter3TokenAAccount.amount.toNumber() == voter3TokenAAmountOwned);
   });
 
   async function findAssociatedTokenAddress(
@@ -167,7 +193,7 @@ describe("qwestive-voting", () => {
       accounts: {
         communityVoteAccount: communityVoteAccount.publicKey,
         tokenAccount: voter1TokenAAccount,
-        mint: mintA.publicKey,
+        //mint: mintA.publicKey,
         user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -183,7 +209,7 @@ describe("qwestive-voting", () => {
       accounts: {
         communityVoteAccount: communityBVoteAccount.publicKey,
         tokenAccount: voter1TokenBAccount,
-        mint: mintB.publicKey,
+        //mint: mintB.publicKey,
         user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -519,7 +545,7 @@ describe("qwestive-voting", () => {
             [
               Buffer.from("vote_account"),
               proposalId,
-              provider.wallet.publicKey.toBuffer(),
+              secondTokenWallet.publicKey.toBuffer(),
             ],
             anchor.workspace.QwestiveVoting.programId
           );
@@ -531,7 +557,7 @@ describe("qwestive-voting", () => {
           accounts: {
             communityVoteAccount: communityVoteAccount.publicKey,
             proposal: proposalAccountPublicKey,
-            user: provider.wallet.publicKey,
+            user: secondTokenWallet.publicKey,
             vote: voteAccountPublicKey,
             tokenAccount: voter3TokenAAccount,
             systemProgram: SystemProgram.programId,
@@ -693,26 +719,27 @@ describe("qwestive-voting", () => {
     );
     assert.ok(firstProposal.title === "Test Title");
 
-    const [voteAccountPublicKey, voteBump] =
+    const [voter2AccountPublicKey, voter2Bump] =
       await anchor.web3.PublicKey.findProgramAddress(
-        [Buffer.from("vote_account"), proposalId, newUser.publicKey.toBuffer()],
+        [Buffer.from("vote_account"), proposalId, 
+        tokenWallet.publicKey.toBuffer()],
         anchor.workspace.QwestiveVoting.programId
       );
 
     await program.rpc.voteForProposal(
-      voteBump, 
+      voter2Bump, 
       new anchor.BN(0),
       false, 
       new anchor.BN(0), {
       accounts: {
         communityVoteAccount: communityVoteAccount.publicKey,
         proposal: proposalAccountPublicKey,
-        user: newUser.publicKey,
-        vote: voteAccountPublicKey,
-        tokenAccount: voter1TokenAAccount,
+        user: tokenWallet.publicKey,
+        vote: voter2AccountPublicKey,
+        tokenAccount: voter2TokenAAccount,
         systemProgram: SystemProgram.programId,
       },
-      signers: [newUser],
+      signers: [tokenWallet],
     });
 
     const vote = await program.account.vote.all();
@@ -737,7 +764,7 @@ describe("qwestive-voting", () => {
         [
           Buffer.from("vote_account"),
           secondProposalId,
-          newUser.publicKey.toBuffer(),
+          tokenWallet.publicKey.toBuffer(),
         ],
         anchor.workspace.QwestiveVoting.programId
       );
@@ -747,11 +774,11 @@ describe("qwestive-voting", () => {
         communityVoteAccount: communityVoteAccount.publicKey,
         proposal: secondProposalAccountPublicKey,
         vote: secondVoteAccountPublicKey,
-        tokenAccount: voter1TokenAAccount,
-        user: newUser.publicKey,
+        tokenAccount: voter2TokenAAccount,
+        user: tokenWallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
-      signers: [newUser],
+      signers: [tokenWallet],
     });
 
     const vote = await program.account.vote.all();
@@ -841,8 +868,9 @@ describe("qwestive-voting", () => {
     const account = await program.account.communityVoteAccount.fetch(
       communityVoteAccount.publicKey
     );
+    
     const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
-
+    // Get the weighted vote proposal id
     const [proposalAccountPublicKey] =
       await anchor.web3.PublicKey.findProgramAddress(
         [Buffer.from("proposal_account"), proposalId],
@@ -856,49 +884,49 @@ describe("qwestive-voting", () => {
     assert.ok(weightedVoteProposal.title === "Weighted Vote Title");
 
     // Voter with 500 tokens votes true
-    const [vote1AccountPublicKey, vote1Bump] =
+    const [voter1AccountPublicKey, voter1Bump] =
       await anchor.web3.PublicKey.findProgramAddress(
         [
           Buffer.from("vote_account"),
           proposalId,
-          newUser.publicKey.toBuffer(),
+          provider.wallet.publicKey.toBuffer(),
         ],
         anchor.workspace.QwestiveVoting.programId
       );
 
-    await program.rpc.voteForProposal(vote1Bump, weightedVoteProposal.id, true, new anchor.BN(0), {
+    await program.rpc.voteForProposal(voter1Bump, weightedVoteProposal.id, true, new anchor.BN(0), {
       accounts: {
         communityVoteAccount: communityVoteAccount.publicKey,
         proposal: proposalAccountPublicKey,
-        vote: vote1AccountPublicKey,
+        vote: voter1AccountPublicKey,
         tokenAccount: voter1TokenAAccount,
-        user: newUser.publicKey,
+        user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
-      signers: [newUser],
+      //signers: [provider.wallet.publicKey],
     });
 
-    // Voter with 1 token votes false
-    const [vote2AccountPublicKey, vote2Bump] =
+    // Voter 3 with 1 token A votes false
+    const [voter3AccountPublicKey, voter3Bump] =
     await anchor.web3.PublicKey.findProgramAddress(
       [
         Buffer.from("vote_account"),
         proposalId,
-        provider.wallet.publicKey.toBuffer(),
+        secondTokenWallet.publicKey.toBuffer(),
       ],
       anchor.workspace.QwestiveVoting.programId
     );
 
-    await program.rpc.voteForProposal(vote2Bump, weightedVoteProposal.id, false, new anchor.BN(0), {
+    await program.rpc.voteForProposal(voter3Bump, weightedVoteProposal.id, false, new anchor.BN(0), {
       accounts: {
         communityVoteAccount: communityVoteAccount.publicKey,
         proposal: proposalAccountPublicKey,
-        vote: vote2AccountPublicKey,
+        vote: voter3AccountPublicKey,
         tokenAccount: voter3TokenAAccount,
-        user: provider.wallet.publicKey,
+        user: secondTokenWallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
-      //signers: [tokenWallet],
+      signers: [secondTokenWallet],
     });
 
     const vote = await program.account.vote.all();
@@ -909,17 +937,90 @@ describe("qwestive-voting", () => {
     );
 
     const updated1Vote = await program.account.vote.fetch(
-      vote1AccountPublicKey
+      voter1AccountPublicKey
     );
 
-    const updated2Vote = await program.account.vote.fetch(
-      vote2AccountPublicKey
+    const updated3Vote = await program.account.vote.fetch(
+      voter3AccountPublicKey
     );
 
-    assert.ok(updatedWeightedVoteProposal.voteYes.toNumber() == tokenAmountOwned);
-    assert.ok(updatedWeightedVoteProposal.voteNo.toNumber() == 1);
-    assert.ok(updated1Vote.voterWeight.toNumber() == tokenAmountOwned);
-    assert.ok(updated2Vote.voterWeight.toNumber() == 1);
+    assert.ok(updatedWeightedVoteProposal.voteYes.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updatedWeightedVoteProposal.voteNo.toNumber() == voter3TokenAAmountOwned);
+    assert.ok(updated1Vote.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updated3Vote.voterWeight.toNumber() == voter3TokenAAmountOwned);
   });
 
+  // **************** Tally Tests *******************************//
+  it("Can not tally vote before beginning tally instruction!", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+
+    // Get the proposal with weighted voting system
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+      // Retrieve the weighted vote proposal
+    const weightedVoteProposal = await program.account.proposal.fetch(
+        proposalAccountPublicKey
+    );
+
+    const [voter1AccountPublicKey, voter1Bump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("vote_account"),
+          proposalId,
+          provider.wallet.publicKey.toBuffer(),
+        ],
+        anchor.workspace.QwestiveVoting.programId
+      );
+    console.log(voter1AccountPublicKey.toString(), voter1Bump);
+
+    await assert.rejects(
+      async () => {
+        await program.rpc.tallyVote(
+          weightedVoteProposal.id,
+          {
+            accounts: {
+              proposal: proposalAccountPublicKey,
+              user: provider.wallet.publicKey,
+              vote: voter1AccountPublicKey,
+              tokenAccount: voter1TokenAAccount,
+              systemProgram: SystemProgram.programId,
+            },
+          }
+        );
+      },
+      {
+        name: "Error",
+        // message: "301: You have already voted for this proposal",
+      }
+    );
+
+    //const programId = new anchor.web3.PublicKey("<YOUR-PROGRAM-ID>");
+    // console.log("provider wallet key: {}", provider.wallet.publicKey);
+    // console.log("tokenWallet key: {}", tokenWallet.publicKey);
+    // console.log("secondTokenWallet key: {}", secondTokenWallet.publicKey);
+    // console.log("Qwestive programId: {}",  program.programId);
+
+    const updatedWeightedProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    const updated1Vote = await program.account.vote.fetch(
+      voter1AccountPublicKey
+    );
+
+    assert.ok(updatedWeightedProposal.voteYes.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updatedWeightedProposal.voteNo.toNumber() == voter3TokenAAmountOwned);
+    assert.ok(updatedWeightedProposal.votingFinalized == false);
+    assert.ok(updatedWeightedProposal.tallyStarted == false);
+    assert.ok(updated1Vote.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updated1Vote.tallyCompleted == false);
+  });
 });
