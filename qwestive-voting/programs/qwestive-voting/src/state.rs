@@ -46,7 +46,7 @@ pub struct VoteForProposal<'info> {
     #[account(mut, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump = proposal.bump)]
     pub proposal: Account<'info, Proposal>,
 
-    #[account(init, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()] , bump = vote_account_bump, payer = user, space = Vote::LEN)]
+    #[account(init, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()], bump = vote_account_bump, payer = user, space = Vote::LEN)]
     pub vote: Account<'info, Vote>,
 
     // The token account holding the gated token for this proposal
@@ -79,7 +79,7 @@ pub struct TallyVote<'info> {
     #[account(mut, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump = proposal.bump)]
     pub proposal: Account<'info, Proposal>,
 
-    #[account(mut, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()] , bump = vote_account_bump)]
+    #[account(mut, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()], bump = vote_account_bump)]
     pub vote: Account<'info, Vote>,
 
     // The token account holding the gated token for this proposal
@@ -92,13 +92,10 @@ pub struct TallyVote<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(vote_account_bump: u8, proposal_id: u64)]
+#[instruction(proposal_id: u64)]
 pub struct FinalizeVote<'info> {
     #[account(mut, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump = proposal.bump)]
     pub proposal: Account<'info, Proposal>,
-
-    #[account(mut, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()] , bump = vote_account_bump)]
-    pub vote: Account<'info, Vote>,
 
     // The token account holding the gated token for this proposal
     #[account(mut)]

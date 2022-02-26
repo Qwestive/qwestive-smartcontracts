@@ -220,6 +220,10 @@
       ],
       "args": [
         {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
           "name": "proposalId",
           "type": "u64"
         }
@@ -230,11 +234,6 @@
       "accounts": [
         {
           "name": "proposal",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vote",
           "isMut": true,
           "isSigner": false
         },

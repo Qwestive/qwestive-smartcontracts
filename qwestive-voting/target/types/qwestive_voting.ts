@@ -220,6 +220,10 @@ export type QwestiveVoting = {
       ],
       "args": [
         {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
           "name": "proposalId",
           "type": "u64"
         }
@@ -230,11 +234,6 @@ export type QwestiveVoting = {
       "accounts": [
         {
           "name": "proposal",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vote",
           "isMut": true,
           "isSigner": false
         },
@@ -767,6 +766,10 @@ export const IDL: QwestiveVoting = {
       ],
       "args": [
         {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
           "name": "proposalId",
           "type": "u64"
         }
@@ -777,11 +780,6 @@ export const IDL: QwestiveVoting = {
       "accounts": [
         {
           "name": "proposal",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vote",
           "isMut": true,
           "isSigner": false
         },

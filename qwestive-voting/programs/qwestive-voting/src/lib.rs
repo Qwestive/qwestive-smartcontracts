@@ -306,13 +306,15 @@ mod qwestive_voting {
 
         // Make sure the voting session has ended before tally can begin
         if current_timestamp < proposal.voting_end_timestamp {
-            // return error if proposal has ended
+            msg!("Current time {}", current_timestamp);
+            msg!("Proposal Created Time {}" , proposal.created_timestamp);   
+            msg!("Vote End Time {}" , proposal.voting_end_timestamp);
+            msg!("Finalize End Time {}" , proposal.finalize_vote_end_timestamp);
             return Err(ErrorCode::VotingTimeHasNotEnded.into());
         }
 
         // Make sure it has not exceeded the finalize voting time stamp
         if current_timestamp > proposal.finalize_vote_end_timestamp {
-            // return error if proposal has finalized
             return Err(ErrorCode::ProposalVotingFinalized.into());
         }
 
@@ -338,6 +340,7 @@ mod qwestive_voting {
 
     pub fn tally_vote(
         ctx: Context<TallyVote>,
+        vote_account_bump: u8,
         proposal_id: u64,
     ) -> ProgramResult {
         let vote_account = &mut ctx.accounts.vote;
@@ -443,7 +446,6 @@ mod qwestive_voting {
         ctx: Context<FinalizeVote>,
         proposal_id: u64,
     ) -> ProgramResult {
-        let vote_account = &mut ctx.accounts.vote;
         let proposal = &mut ctx.accounts.proposal;
         let user = &mut ctx.accounts.user.to_account_info();
         let token_account = &mut ctx.accounts.token_account;
