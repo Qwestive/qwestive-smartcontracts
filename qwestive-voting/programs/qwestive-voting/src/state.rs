@@ -125,6 +125,7 @@ pub struct Proposal {
     pub vote_system_type: u8,               // Defines the voting type, 1 - 1 vote per token account, 2 - weighted, 3- quadratic
     pub threshold: u64,                     // This is a minimum vote threshold needed to approve this proposal, a 0 threshold means no vote quota is required
     pub voting_type: u8,                    // Defines the voting type, 1 - yes or no votes, 2- multiple candidates
+    pub total_candidates: u64,              // Total number of candidates if using multiple candidate voting
     //pub vote_options: AccountLoader<'info, VoteCandidates>, // Used for multiple choice proposals
     pub vote_yes: u64,                      // Yes vote count used for voting type 1
     pub vote_no: u64,                       // No vote count used for voting type 1
@@ -142,7 +143,7 @@ pub struct Proposal {
 pub struct Vote {
     pub proposal_id: u64,                   // Unique proposal id
     pub vote_bool: bool,                    // Use this vote type for yes or no votes
-    pub candidate: u8,                      // Use this for a multiple choice vote, a 0 value indicates vote bool is used
+    pub candidate: u64,                     // Use this for a multiple choice vote, a 0 value indicates vote bool is used
     pub voter_weight: u64,                  // The weight of each vote, a 0 value defaults to no additional weight
     pub voter: Pubkey,                      // The voters token account key
     pub mint: Pubkey,                       // Mint key of the gated token
@@ -193,6 +194,7 @@ impl Proposal {
     + PUBKEY_LENGTH                     // Mint
     + U64_LEN                           // minimum token
     + U8_LEN                            // vote system type
+    + U64_LEN                           // total candidates to choose from
     + VOTE_COUNT_LENGTH                 // vote yes count
     + VOTE_COUNT_LENGTH                 // vote no count
     + U64_LEN                           // Vote total count
@@ -209,7 +211,7 @@ impl Vote {
     const LEN: usize = DISCRIMINATOR_LENGTH 
     + U64_LEN                           // proposal id
     + BOOL_LENGTH                       // vote bool
-    + U8_LEN                            // candidate
+    + U64_LEN                           // candidate
     + U64_LEN                           // voter weight
     + PUBKEY_LENGTH                     // Voter
     + PUBKEY_LENGTH                     // Mint

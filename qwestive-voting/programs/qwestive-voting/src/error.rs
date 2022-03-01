@@ -6,6 +6,8 @@ pub enum ErrorCode  {
 	ProposalIndexOutOfBounds,
 	#[msg("The requested proposal id does not match the proposal account")]
 	ProposalIDMismatch,
+	#[msg("There is no candidate vote with this number")]
+	CandidateIndexOutOfBounds,
 	#[msg("You have already voted for this proposal")]
 	YouAlreadyVotedForThisProposal,
 	#[msg("Title is too long. maximum: 80 character")]

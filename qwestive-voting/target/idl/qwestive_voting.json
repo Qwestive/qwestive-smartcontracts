@@ -96,6 +96,10 @@
           "type": "u8"
         },
         {
+          "name": "totalCandidates",
+          "type": "u64"
+        },
+        {
           "name": "votingEndTimestamp",
           "type": "u128"
         },
@@ -154,7 +158,7 @@
         },
         {
           "name": "candidate",
-          "type": "u8"
+          "type": "u64"
         }
       ]
     },
@@ -328,6 +332,10 @@
             "type": "u8"
           },
           {
+            "name": "totalCandidates",
+            "type": "u64"
+          },
+          {
             "name": "voteYes",
             "type": "u64"
           },
@@ -385,7 +393,7 @@
           },
           {
             "name": "candidate",
-            "type": "u8"
+            "type": "u64"
           },
           {
             "name": "voterWeight",
@@ -428,116 +436,121 @@
     },
     {
       "code": 6002,
+      "name": "CandidateIndexOutOfBounds",
+      "msg": "There is no candidate vote with this number"
+    },
+    {
+      "code": 6003,
       "name": "YouAlreadyVotedForThisProposal",
       "msg": "You have already voted for this proposal"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "TitleIsTooLong",
       "msg": "Title is too long. maximum: 80 character"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "DescriptionIsTooLong",
       "msg": "Description is too long. maximum: 1024 character"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidVotingType",
       "msg": "The weight voting type is not a valid option"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidVotingSystemType",
       "msg": "The voting system type is not a valid option"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "ProposalVotingFinalized",
       "msg": "Proposal voting is finalized no changes can be made"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "VotingTimeHasNotEnded",
       "msg": "The voting time has not ended"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "FinalizeVoteTimeHasNotEnded",
       "msg": "The time for tallying votes has not ended wait until tally time has ended"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "VotingEndTimestampTooSmall",
       "msg": "The timestamp of voting end must be greater than the current timestamp"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "FinalizeTimestampTooSmall",
       "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "ProposalTallyAlreadyStarted",
       "msg": "The proposal tally has already started"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "TallyHasNotStarted",
       "msg": "Vote tally has not started tally must begin before tallying vote"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "TallyHasStarted",
       "msg": "Vote tally has started no new votes can be submitted"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "TallyHasEnded",
       "msg": "The timing window for any vote tally has ended"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
     }

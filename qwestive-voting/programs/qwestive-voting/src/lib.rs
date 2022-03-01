@@ -58,6 +58,7 @@ mod qwestive_voting {
         vote_system_type: u8,
         threshold: u64,
         voting_type: u8,
+        total_candidates: u64,
         voting_end_timestamp: u128,
         finalize_vote_end_timestamp: u128,
     ) -> ProgramResult {
@@ -116,8 +117,8 @@ mod qwestive_voting {
             return Err(ErrorCode::FinalizeTimestampTooSmall.into());
         }
 
-        // Defines the voting type, 0 - 1 vote per token account, 1 - weighted, 2 - quadratic
-        if vote_system_type > 2 {
+        // Defines the voting type, 0 - 1 vote per token account, 1 - weighted, 2 - quadratic (not supported yet)
+        if vote_system_type >= 2 {
             return Err(ErrorCode::InvalidVotingSystemType.into());
         }
 
@@ -135,6 +136,7 @@ mod qwestive_voting {
         proposal.vote_system_type = vote_system_type;
         proposal.threshold = threshold;
         proposal.voting_type = voting_type;
+        proposal.total_candidates = total_candidates;
         //proposal.vote_options: AccountLoader<'info, VoteCandidates>, // Used for multiple choice proposals
         proposal.vote_yes =  0;
         proposal.vote_no = 0;
@@ -159,7 +161,7 @@ mod qwestive_voting {
         vote_account_bump: u8,
         proposal_id: u64,
         vote_bool: bool,
-        candidate: u8,
+        candidate: u64,
     ) -> ProgramResult {
         let community_vote_account = &mut ctx.accounts.community_vote_account;
         let proposal = &mut ctx.accounts.proposal;
@@ -227,6 +229,11 @@ mod qwestive_voting {
             return Err(ErrorCode::TallyHasStarted.into());
         }
 
+        // Candidate vote is outside of the allowed proposal options
+        if proposal.voting_type == 1 && candidate > proposal.total_candidates {
+            return Err(ErrorCode::CandidateIndexOutOfBounds.into());
+        }
+
         vote_account.proposal_id = proposal_id;
         vote_account.voter = *user.key;
         // This flag is always set to false when a vote is made, when a tally is made the qwestive-voting will set this to true
@@ -263,6 +270,8 @@ mod qwestive_voting {
         }
         // Voting type 1 is candidate
         else if proposal.voting_type == 1 {
+            proposal.vote_yes = 0;
+            proposal.vote_no = 0;
             vote_account.candidate = candidate;
             // vote bool is always false if candidate is chosen
             vote_account.vote_bool = false;
@@ -432,9 +441,10 @@ mod qwestive_voting {
         }
         // Voting type 1 is candidate TODO Determine how to do multiple choice
         else if proposal.voting_type == 1 {
-            // vote_account.candidate = candidate;
-            // // vote bool is always false if candidate is chosen
-            // vote_account.vote_bool = false;
+            proposal.vote_no = 0;
+            proposal.vote_yes = 0;
+            // vote bool is always false if candidate is chosen
+            vote_account.vote_bool = false;
         }
 
         vote_account.tally_completed = true;

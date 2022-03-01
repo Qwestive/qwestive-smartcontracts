@@ -276,6 +276,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(1), // voting system - one vote per token account
       new anchor.BN(1), // threshold - needs at least 1 vote 
       new anchor.BN(0), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+      new anchor.BN(0), // 0 candidates when not using voting type 1
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 1 * DAY_IN_UNIX), //voting_end_timestamp
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 2 * DAY_IN_UNIX), //finalize_vote_end_timestamp
       {
@@ -315,6 +316,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(1), // voting system - one vote per token account
       new anchor.BN(2), // threshold - needs at least 1 vote 
       new anchor.BN(0), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+      new anchor.BN(0), // 0 candidates when not using voting type 1
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 1 * DAY_IN_UNIX), //voting_end_timestamp
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 2 * DAY_IN_UNIX), //finalize_vote_end_timestamp
       {
@@ -361,6 +363,7 @@ describe("qwestive-voting", () => {
         new anchor.BN(1), // voting system - one vote per token account
         new anchor.BN(1), // threshold - needs at least 1 vote 
         new anchor.BN(0), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+        new anchor.BN(0), // 0 candidates when not using voting type 1
         new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 1 * DAY_IN_UNIX), //voting_end_timestamp
         new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 2 * DAY_IN_UNIX), //finalize_vote_end_timestamp
         {
@@ -412,6 +415,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(1), // voting system - one vote per token account
       new anchor.BN(1), // threshold - needs at least 1 vote 
       new anchor.BN(0), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+      new anchor.BN(0), // 0 candidates when not using voting type 1
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 1 * DAY_IN_UNIX), //voting_end_timestamp
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + 2 * DAY_IN_UNIX), //finalize_vote_end_timestamp
       {
@@ -877,6 +881,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(1), // voting system - 0 - one vote per token account, 1 - weighted, 2 - quadratic (not supported)
       new anchor.BN(1), // threshold - needs at least 1 vote 
       new anchor.BN(0), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+      new anchor.BN(0), // 0 candidates when not using voting type 1
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (3 * SECONDS_IN_UNIX)), //voting_end_timestamp
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (10 * SECONDS_IN_UNIX)), //finalize_vote_end_timestamp
       {
@@ -889,6 +894,12 @@ describe("qwestive-voting", () => {
         },
       }
     );
+
+    const weightedVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(weightedVoteProposal.title === "Weighted Vote Title");
   });
 
   it("Can vote for weighted vote proposal", async () => {
@@ -1422,7 +1433,7 @@ describe("qwestive-voting", () => {
     assert.ok(updatedWeightedProposal.votingFinalized == true);
   });
 
-  it("Cannot tally vote after voting finalized!", async () => {
+  it("Cannot tally vote already tallied and after voting finalized!", async () => {
     const account = await program.account.communityVoteAccount.fetch(
       communityVoteAccount.publicKey
     );
@@ -1546,4 +1557,230 @@ describe("qwestive-voting", () => {
     assert.ok(updatedVoter4Account.tallyCompleted == false);
   });
 
+  //********************Multiple Candidate Test**************************//
+  
+  it("Can add a weighted multiple candidate vote proposal!", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    console.log("Your account", account);
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber() + 1);
+    const [proposalAccountPublicKey, accountBump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    await program.rpc.addProposal(
+      accountBump,
+      new anchor.BN(account.totalProposalCount.toNumber() + 1),
+      "Which Coin is the Best?",
+      "1.BTC 2.ETH 3.SOL",
+      new anchor.BN(0), // minimum_token_count
+      new anchor.BN(1), // voting system - 0 - one vote per token account, 1 - weighted, 2 - quadratic (not supported)
+      new anchor.BN(1), // threshold - needs at least 1 vote 
+      new anchor.BN(1), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
+      new anchor.BN(3), // 0 candidates when not using voting type 1
+      new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (3 * SECONDS_IN_UNIX)), //voting_end_timestamp
+      new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (10 * SECONDS_IN_UNIX)), //finalize_vote_end_timestamp
+      {
+        accounts: {
+          communityVoteAccount: communityVoteAccount.publicKey,
+          proposal: proposalAccountPublicKey,
+          tokenAccount: voter1TokenAAccount,
+          user: provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+      }
+    );
+
+    const weightedVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(weightedVoteProposal.title === "Which Coin is the Best?");
+    assert.ok(weightedVoteProposal.description === "1.BTC 2.ETH 3.SOL");
+  });
+
+  it("Can vote for candidate vote proposal", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+    // Get the candidate vote proposal id
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    const candidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+
+    // Voter with 500 tokens votes true
+    const [voter1AccountPublicKey, voter1Bump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("vote_account"),
+          proposalId,
+          provider.wallet.publicKey.toBuffer(),
+        ],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    await program.rpc.voteForProposal(voter1Bump, candidateVoteProposal.id, false, new anchor.BN(1), {
+      accounts: {
+        communityVoteAccount: communityVoteAccount.publicKey,
+        proposal: proposalAccountPublicKey,
+        vote: voter1AccountPublicKey,
+        tokenAccount: voter1TokenAAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      //signers: [provider.wallet.publicKey],
+    });
+
+    // Voter 3 with 1 token A votes false
+    const [voter3AccountPublicKey, voter3Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+        Buffer.from("vote_account"),
+        proposalId,
+        secondTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await program.rpc.voteForProposal(voter3Bump, candidateVoteProposal.id, false, new anchor.BN(2), {
+      accounts: {
+        communityVoteAccount: communityVoteAccount.publicKey,
+        proposal: proposalAccountPublicKey,
+        vote: voter3AccountPublicKey,
+        tokenAccount: voter3TokenAAccount,
+        user: secondTokenWallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [secondTokenWallet],
+    });
+
+    // Voter 3
+    const [voter4AccountPublicKey, voter4Bump] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [
+          Buffer.from("vote_account"),
+          proposalId,
+          thirdTokenWallet.publicKey.toBuffer(),
+        ],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+      await program.rpc.voteForProposal(voter4Bump, candidateVoteProposal.id, false, new anchor.BN(3), {
+        accounts: {
+          communityVoteAccount: communityVoteAccount.publicKey,
+          proposal: proposalAccountPublicKey,
+          vote: voter4AccountPublicKey,
+          tokenAccount: voter4TokenAAccount,
+          user: thirdTokenWallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [thirdTokenWallet],
+      });
+
+    const vote = await program.account.vote.all();
+    assert.equal(vote.length, 11);
+
+    const updatedCandidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    const updated1Vote = await program.account.vote.fetch(
+      voter1AccountPublicKey
+    );
+
+    const updated3Vote = await program.account.vote.fetch(
+      voter3AccountPublicKey
+    );
+
+    const updated4Vote = await program.account.vote.fetch(
+      voter4AccountPublicKey
+    );
+
+    assert.ok(updatedCandidateVoteProposal.voteYes.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.totalVotes.toNumber() == 3);
+    assert.ok(updated1Vote.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updated3Vote.voterWeight.toNumber() == voter3TokenAAmountOwned);
+    assert.ok(updated4Vote.voterWeight.toNumber() == voter4TokenAAmountOwned);
+    assert.ok(updated1Vote.candidate.toNumber() == 1);
+    assert.ok(updated3Vote.candidate.toNumber() == 2);
+    assert.ok(updated4Vote.candidate.toNumber() == 3);
+  });
+
+  it("We can filter votes for specific candidates count", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+
+    // Get the candidate vote proposal id
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    const candidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+    const votesForCandidate1 = await program.account.vote.all([
+      {
+        memcmp: {
+          offset: 8, // Discriminator.
+          bytes: bs58.encode(
+            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(1)])
+          ),
+        },
+      },
+    ]);
+
+    const votesForCandidate2 = await program.account.vote.all([
+      {
+        memcmp: {
+          offset: 8, // Discriminator.
+          bytes: bs58.encode(
+            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(2)])
+          ),
+        },
+      },
+    ]);
+
+    const votesForCandidate3 = await program.account.vote.all([
+      {
+        memcmp: {
+          offset: 8, // Discriminator.
+          bytes: bs58.encode(
+            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(3)])
+          ),
+        },
+      },
+    ]);
+
+    assert.equal(votesForCandidate1.length, 1);
+    assert.ok(votesForCandidate1[0].account.candidate.toNumber() == 1);
+    assert.ok(votesForCandidate1[0].account.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.equal(votesForCandidate2.length, 1);
+    assert.ok(votesForCandidate2[0].account.candidate.toNumber() == 2);
+    assert.ok(votesForCandidate2[0].account.voterWeight.toNumber() == voter3TokenAAmountOwned);
+    assert.equal(votesForCandidate3.length, 1);
+    assert.ok(votesForCandidate3[0].account.candidate.toNumber() == 3);
+    assert.ok(votesForCandidate3[0].account.voterWeight.toNumber() == voter4TokenAAmountOwned);
+  });
 });
