@@ -234,6 +234,10 @@ mod qwestive_voting {
             return Err(ErrorCode::CandidateIndexOutOfBounds.into());
         }
 
+        if proposal.voting_type == 1 && vote_bool == true {
+            return Err(ErrorCode::InvalidVoteParameter.into());
+        }
+
         vote_account.proposal_id = proposal_id;
         vote_account.voter = *user.key;
         // This flag is always set to false when a vote is made, when a tally is made the qwestive-voting will set this to true
@@ -448,7 +452,6 @@ mod qwestive_voting {
         }
 
         vote_account.tally_completed = true;
-
         Ok(())
     }
 

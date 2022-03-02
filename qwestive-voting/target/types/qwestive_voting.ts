@@ -388,6 +388,10 @@ export type QwestiveVoting = {
             "type": "u64"
           },
           {
+            "name": "tallyCompleted",
+            "type": "bool"
+          },
+          {
             "name": "voteBool",
             "type": "bool"
           },
@@ -406,10 +410,6 @@ export type QwestiveVoting = {
           {
             "name": "mint",
             "type": "publicKey"
-          },
-          {
-            "name": "tallyCompleted",
-            "type": "bool"
           },
           {
             "name": "createdTimestamp",
@@ -536,21 +536,26 @@ export type QwestiveVoting = {
     },
     {
       "code": 6022,
+      "name": "InvalidVoteParameter",
+      "msg": "The vote parameter entered is invalid for this type of voting"
+    },
+    {
+      "code": 6023,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
     }
@@ -947,6 +952,10 @@ export const IDL: QwestiveVoting = {
             "type": "u64"
           },
           {
+            "name": "tallyCompleted",
+            "type": "bool"
+          },
+          {
             "name": "voteBool",
             "type": "bool"
           },
@@ -965,10 +974,6 @@ export const IDL: QwestiveVoting = {
           {
             "name": "mint",
             "type": "publicKey"
-          },
-          {
-            "name": "tallyCompleted",
-            "type": "bool"
           },
           {
             "name": "createdTimestamp",
@@ -1095,21 +1100,26 @@ export const IDL: QwestiveVoting = {
     },
     {
       "code": 6022,
+      "name": "InvalidVoteParameter",
+      "msg": "The vote parameter entered is invalid for this type of voting"
+    },
+    {
+      "code": 6023,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
     }

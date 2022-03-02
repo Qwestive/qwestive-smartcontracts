@@ -46,6 +46,8 @@ pub enum ErrorCode  {
 	ProposalIsFinalized,
     #[msg("The number of candidates has exceeded the allowed amount for vote options")]
 	TooManyCandidates,
+	#[msg("The vote parameter entered is invalid for this type of voting")]
+	InvalidVoteParameter,
 	#[msg("The token account is not the correct mint")]
 	InvalidTokenAccount,
 	#[msg("The token account balance is less than the required balance for the community")]

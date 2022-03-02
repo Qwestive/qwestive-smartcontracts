@@ -142,12 +142,12 @@ pub struct Proposal {
 #[account]
 pub struct Vote {
     pub proposal_id: u64,                   // Unique proposal id
+    pub tally_completed: bool,              // Flag indicating the vote has been tallied
     pub vote_bool: bool,                    // Use this vote type for yes or no votes
     pub candidate: u64,                     // Use this for a multiple choice vote, a 0 value indicates vote bool is used
     pub voter_weight: u64,                  // The weight of each vote, a 0 value defaults to no additional weight
     pub voter: Pubkey,                      // The voters token account key
     pub mint: Pubkey,                       // Mint key of the gated token
-    pub tally_completed: bool,              // Flag indicating the vote has been tallied
     pub created_timestamp: i64,
     pub bump: u8,
 }

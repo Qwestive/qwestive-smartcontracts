@@ -96,7 +96,6 @@ describe("qwestive-voting", () => {
     voter1TokenAAccount = await mintA.createAccount(provider.wallet.publicKey);
     voter1TokenBAccount = await mintB.createAccount(provider.wallet.publicKey);
 
-
     // First Token Wallet Holder Token Accounts
     voter2TokenAAccount = await mintA.createAccount(tokenWallet.publicKey);
     voter2TokenBAccount = await mintB.createAccount(tokenWallet.publicKey);
@@ -834,7 +833,7 @@ describe("qwestive-voting", () => {
         memcmp: {
           offset: 8, // Discriminator.
           bytes: bs58.encode(
-            Buffer.concat([getNumberBuffer(0), Buffer.from([1])])
+            Buffer.concat([getNumberBuffer(0), Buffer.from([0]), Buffer.from([1])])
           ),
         },
       },
@@ -851,7 +850,7 @@ describe("qwestive-voting", () => {
         memcmp: {
           offset: 8, // Discriminator.
           bytes: bs58.encode(
-            Buffer.concat([getNumberBuffer(1), Buffer.from([0])])
+            Buffer.concat([getNumberBuffer(0), Buffer.from([0]), Buffer.from([0])])
           ),
         },
       },
@@ -1582,7 +1581,7 @@ describe("qwestive-voting", () => {
       new anchor.BN(1), // voting_type - 0 - yes or not, 1 - multiple choice is not currently supported
       new anchor.BN(3), // 0 candidates when not using voting type 1
       new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (3 * SECONDS_IN_UNIX)), //voting_end_timestamp
-      new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (10 * SECONDS_IN_UNIX)), //finalize_vote_end_timestamp
+      new anchor.BN((+new Date() / UNIX_MS_FACTOR) + (7 * SECONDS_IN_UNIX)), //finalize_vote_end_timestamp
       {
         accounts: {
           communityVoteAccount: communityVoteAccount.publicKey,
@@ -1620,7 +1619,6 @@ describe("qwestive-voting", () => {
     );
 
     assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
-
 
     // Voter with 500 tokens votes true
     const [voter1AccountPublicKey, voter1Bump] =
@@ -1668,31 +1666,8 @@ describe("qwestive-voting", () => {
       signers: [secondTokenWallet],
     });
 
-    // Voter 3
-    const [voter4AccountPublicKey, voter4Bump] =
-      await anchor.web3.PublicKey.findProgramAddress(
-        [
-          Buffer.from("vote_account"),
-          proposalId,
-          thirdTokenWallet.publicKey.toBuffer(),
-        ],
-        anchor.workspace.QwestiveVoting.programId
-      );
-
-      await program.rpc.voteForProposal(voter4Bump, candidateVoteProposal.id, false, new anchor.BN(3), {
-        accounts: {
-          communityVoteAccount: communityVoteAccount.publicKey,
-          proposal: proposalAccountPublicKey,
-          vote: voter4AccountPublicKey,
-          tokenAccount: voter4TokenAAccount,
-          user: thirdTokenWallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [thirdTokenWallet],
-      });
-
     const vote = await program.account.vote.all();
-    assert.equal(vote.length, 11);
+    assert.equal(vote.length, 10);
 
     const updatedCandidateVoteProposal = await program.account.proposal.fetch(
       proposalAccountPublicKey
@@ -1706,6 +1681,206 @@ describe("qwestive-voting", () => {
       voter3AccountPublicKey
     );
 
+    assert.ok(updatedCandidateVoteProposal.voteYes.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.totalVotes.toNumber() == 2);
+    assert.ok(updated1Vote.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updated3Vote.voterWeight.toNumber() == voter3TokenAAmountOwned);
+    assert.ok(updated1Vote.candidate.toNumber() == 1);
+    assert.ok(updated3Vote.candidate.toNumber() == 2);
+  });
+
+  it("Cannot vote for candidates outside of candidate max!", async() => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+    // Get the candidate vote proposal id
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    const candidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+    // Voter 3
+    const [voter4AccountPublicKey, voter4Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+            Buffer.from("vote_account"),
+            proposalId,
+            thirdTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await assert.rejects(
+      async () => {
+        await program.rpc.voteForProposal(voter4Bump, candidateVoteProposal.id, false, new anchor.BN(4), {
+            accounts: {
+              communityVoteAccount: communityVoteAccount.publicKey,
+              proposal: proposalAccountPublicKey,
+              vote: voter4AccountPublicKey,
+              tokenAccount: voter4TokenAAccount,
+              user: thirdTokenWallet.publicKey,
+              systemProgram: SystemProgram.programId,
+            },
+            signers: [thirdTokenWallet],});
+      },
+      {
+        name: "Error",
+        // message: "301: You have already voted for this proposal",
+      }
+    );
+  
+    const updatedCandidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    await assert.rejects(
+      async () => {
+      const updated4Vote = await program.account.vote.fetch(
+        voter4AccountPublicKey
+      );
+      },
+      {
+        name: "Error",
+        // message: "301: Account doesn't exist",
+      }
+    );
+
+    const vote = await program.account.vote.all();
+    assert.equal(vote.length, 10);
+    assert.ok(updatedCandidateVoteProposal.voteYes.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.totalVotes.toNumber() == 2);
+  });
+
+  it("Cannot vote for true when proposal voting type is 1!", async() => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+    // Get the candidate vote proposal id
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    const candidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+    // Voter 3
+    const [voter4AccountPublicKey, voter4Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+            Buffer.from("vote_account"),
+            proposalId,
+            thirdTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await assert.rejects(
+      async () => {
+        await program.rpc.voteForProposal(voter4Bump, candidateVoteProposal.id, true, new anchor.BN(3), {
+            accounts: {
+              communityVoteAccount: communityVoteAccount.publicKey,
+              proposal: proposalAccountPublicKey,
+              vote: voter4AccountPublicKey,
+              tokenAccount: voter4TokenAAccount,
+              user: thirdTokenWallet.publicKey,
+              systemProgram: SystemProgram.programId,
+            },
+            signers: [thirdTokenWallet],});
+      },
+      {
+        name: "Error",
+        // message: "301: You have already voted for this proposal",
+      }
+    );
+  
+    const updatedCandidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    await assert.rejects(
+      async () => {
+      const updated4Vote = await program.account.vote.fetch(
+        voter4AccountPublicKey
+      );
+      },
+      {
+        name: "Error",
+        // message: "301: Account doesn't exist",
+      }
+    );
+
+    const vote = await program.account.vote.all();
+    assert.equal(vote.length, 10);
+    assert.ok(updatedCandidateVoteProposal.voteYes.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedCandidateVoteProposal.totalVotes.toNumber() == 2);
+  });
+
+  it("Can have other wallet vote for the candidates", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+    
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+    // Get the candidate vote proposal id
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+    const candidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+    // Voter 3
+    const [voter4AccountPublicKey, voter4Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+            Buffer.from("vote_account"),
+            proposalId,
+            thirdTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await program.rpc.voteForProposal(voter4Bump, candidateVoteProposal.id, false, new anchor.BN(3), {
+      accounts: {
+        communityVoteAccount: communityVoteAccount.publicKey,
+        proposal: proposalAccountPublicKey,
+        vote: voter4AccountPublicKey,
+        tokenAccount: voter4TokenAAccount,
+        user: thirdTokenWallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [thirdTokenWallet],
+    });
+
+    const vote = await program.account.vote.all();
+    assert.equal(vote.length, 11);
+
+    const updatedCandidateVoteProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
     const updated4Vote = await program.account.vote.fetch(
       voter4AccountPublicKey
     );
@@ -1713,15 +1888,11 @@ describe("qwestive-voting", () => {
     assert.ok(updatedCandidateVoteProposal.voteYes.toNumber() == 0);
     assert.ok(updatedCandidateVoteProposal.voteNo.toNumber() == 0);
     assert.ok(updatedCandidateVoteProposal.totalVotes.toNumber() == 3);
-    assert.ok(updated1Vote.voterWeight.toNumber() == voter1TokenAAmountOwned);
-    assert.ok(updated3Vote.voterWeight.toNumber() == voter3TokenAAmountOwned);
     assert.ok(updated4Vote.voterWeight.toNumber() == voter4TokenAAmountOwned);
-    assert.ok(updated1Vote.candidate.toNumber() == 1);
-    assert.ok(updated3Vote.candidate.toNumber() == 2);
     assert.ok(updated4Vote.candidate.toNumber() == 3);
   });
 
-  it("We can filter votes for specific candidates count", async () => {
+  it("We can filter votes for specific candidates before tally has started", async () => {
     const account = await program.account.communityVoteAccount.fetch(
       communityVoteAccount.publicKey
     );
@@ -1745,7 +1916,7 @@ describe("qwestive-voting", () => {
         memcmp: {
           offset: 8, // Discriminator.
           bytes: bs58.encode(
-            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(1)])
+            Buffer.concat([proposalId, Buffer.from([0]), Buffer.from([0]), getNumberBuffer(1)])
           ),
         },
       },
@@ -1756,7 +1927,7 @@ describe("qwestive-voting", () => {
         memcmp: {
           offset: 8, // Discriminator.
           bytes: bs58.encode(
-            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(2)])
+            Buffer.concat([proposalId, Buffer.from([0]), Buffer.from([0]), getNumberBuffer(2)])
           ),
         },
       },
@@ -1767,7 +1938,7 @@ describe("qwestive-voting", () => {
         memcmp: {
           offset: 8, // Discriminator.
           bytes: bs58.encode(
-            Buffer.concat([proposalId, Buffer.from([0]), getNumberBuffer(3)])
+            Buffer.concat([proposalId, Buffer.from([0]), Buffer.from([0]), getNumberBuffer(3)])
           ),
         },
       },
@@ -1782,5 +1953,194 @@ describe("qwestive-voting", () => {
     assert.equal(votesForCandidate3.length, 1);
     assert.ok(votesForCandidate3[0].account.candidate.toNumber() == 3);
     assert.ok(votesForCandidate3[0].account.voterWeight.toNumber() == voter4TokenAAmountOwned);
+  });
+
+  it("Can begin tally after voting time ends", async () => {
+    await new Promise(resolve => setTimeout(resolve, 5 * UNIX_MS_FACTOR));
+
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+
+    // Get the proposal with weighted voting system
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+      // Retrieve the cndidate vote proposal
+    const candidateVoteProposal = await program.account.proposal.fetch(
+        proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+    await program.rpc.beginTally(
+      candidateVoteProposal.id, {
+      accounts: {
+        proposal: proposalAccountPublicKey,
+        tokenAccount: voter3TokenAAccount,
+        user: secondTokenWallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [secondTokenWallet],
+    });
+
+    const updatedCandidateProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+    assert.ok(updatedCandidateProposal.tallyStarted == true);
+  });
+
+  it("Can tally vote", async () => {
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+
+    // Get the proposal with weighted voting system
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+      // Retrieve the candidate vote proposal
+    const candidateVoteProposal = await program.account.proposal.fetch(
+        proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+    const [voter1AccountPublicKey, voter1Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+        Buffer.from("vote_account"),
+        proposalId,
+        provider.wallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await program.rpc.tallyVote( voter1Bump, candidateVoteProposal.id, { 
+      accounts: {
+        proposal: proposalAccountPublicKey,
+        vote: voter1AccountPublicKey,
+        tokenAccount: voter1TokenAAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+    });
+
+    const [voter3AccountPublicKey, voter3Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+        Buffer.from("vote_account"),
+        proposalId,
+        secondTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await program.rpc.tallyVote( voter3Bump, candidateVoteProposal.id, { 
+      accounts: {
+        proposal: proposalAccountPublicKey,
+        vote: voter3AccountPublicKey,
+        tokenAccount: voter3TokenAAccount,
+        user: secondTokenWallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [secondTokenWallet],
+    });
+
+    const [voter4AccountPublicKey, voter4Bump] =
+    await anchor.web3.PublicKey.findProgramAddress(
+      [
+        Buffer.from("vote_account"),
+        proposalId,
+        thirdTokenWallet.publicKey.toBuffer(),
+      ],
+      anchor.workspace.QwestiveVoting.programId
+    );
+
+    await program.rpc.tallyVote( voter4Bump, candidateVoteProposal.id, { 
+      accounts: {
+        proposal: proposalAccountPublicKey,
+        vote: voter4AccountPublicKey,
+        tokenAccount: voter4TokenAAccount,
+        user: thirdTokenWallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [thirdTokenWallet],
+    });
+
+    const updatedWeightedProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    const updatedVoter1Account = await program.account.vote.fetch(
+      voter1AccountPublicKey
+    );
+
+    const updatedVoter3Account = await program.account.vote.fetch(
+      voter3AccountPublicKey
+    );
+
+    const updatedVoter4Account = await program.account.vote.fetch(
+      voter4AccountPublicKey
+    );
+
+    assert.ok(updatedWeightedProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedVoter1Account.tallyCompleted == true);
+    assert.ok(updatedVoter1Account.voterWeight.toNumber() == voter1TokenAAmountOwned);
+    assert.ok(updatedWeightedProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedVoter3Account.tallyCompleted == true);
+    assert.ok(updatedVoter3Account.voterWeight.toNumber() == voter3TokenAAmountOwned);
+    assert.ok(updatedWeightedProposal.voteNo.toNumber() == 0);
+    assert.ok(updatedVoter4Account.tallyCompleted == true);
+    assert.ok(updatedVoter4Account.voterWeight.toNumber() == voter4TokenAAmountOwned);
+  });
+
+  it("Can finalize candidate vote after time ends", async () => {
+    await new Promise(resolve => setTimeout(resolve, 3 * UNIX_MS_FACTOR));
+
+    const account = await program.account.communityVoteAccount.fetch(
+      communityVoteAccount.publicKey
+    );
+
+    // Get the proposal with weighted voting system
+    const proposalId = getNumberBuffer(account.totalProposalCount.toNumber());
+
+    const [proposalAccountPublicKey] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from("proposal_account"), proposalId],
+        anchor.workspace.QwestiveVoting.programId
+      );
+
+      // Retrieve the candidate vote proposal
+    const candidateVoteProposal = await program.account.proposal.fetch(
+        proposalAccountPublicKey
+    );
+
+    assert.ok(candidateVoteProposal.title === "Which Coin is the Best?");
+
+    await program.rpc.finalizeVote( candidateVoteProposal.id, { 
+      accounts: {
+        proposal: proposalAccountPublicKey,
+        tokenAccount: voter1TokenAAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+    });
+
+    const updatedWeightedProposal = await program.account.proposal.fetch(
+      proposalAccountPublicKey
+    );
+
+    assert.ok(updatedWeightedProposal.votingFinalized == true);
   });
 });
