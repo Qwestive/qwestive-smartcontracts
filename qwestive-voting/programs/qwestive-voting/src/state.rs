@@ -2,11 +2,14 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{TokenAccount};
 
 #[derive(Accounts)]
+#[instruction(_community_account_bump: u8)]
 pub struct InitializeVoting<'info> {
     // community account which holds all proposals
-    #[account(init, payer = user, space = CommunityVoteAccount::LEN)]
+    // #[account(init, payer = user, space = CommunityVoteAccount::LEN)]
+    // pub community_vote_account: Account<'info, CommunityVoteAccount>,
+    #[account(init, seeds = [b"community_account".as_ref(), token_account.mint.as_ref()], bump =  _community_account_bump, payer = user, space = CommunityVoteAccount::LEN)]
     pub community_vote_account: Account<'info, CommunityVoteAccount>,
-    
+
     // #[account(mut)]
     // pub mint: AccountInfo<'info>,
 
@@ -20,9 +23,10 @@ pub struct InitializeVoting<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(proposal_account_bump: u8, proposal_id: u64)]
+#[instruction(_community_account_bump: u8, proposal_account_bump: u8, proposal_id: u64)]
 pub struct AddProposal<'info> {
-    #[account(mut)]
+    //#[account(mut)]
+    #[account(mut, seeds = [b"community_account".as_ref(), token_account.mint.as_ref()], bump =  _community_account_bump)]
     pub community_vote_account: Account<'info, CommunityVoteAccount>,
 
     #[account(init, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump =  proposal_account_bump, payer = user, space = Proposal::LEN)]
@@ -38,9 +42,10 @@ pub struct AddProposal<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(vote_account_bump: u8, proposal_id: u64)]
+#[instruction(_community_account_bump: u8, vote_account_bump: u8, proposal_id: u64)]
 pub struct VoteForProposal<'info> {
-    #[account(mut)]
+    //#[account(mut)]
+    #[account(mut, seeds = [b"community_account".as_ref(), token_account.mint.as_ref()], bump = _community_account_bump)]
     pub community_vote_account: Account<'info, CommunityVoteAccount>,
 
     #[account(mut, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump = proposal.bump)]
@@ -74,12 +79,12 @@ pub struct BeginTally<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(vote_account_bump: u8, proposal_id: u64)]
+#[instruction(_vote_account_bump: u8, proposal_id: u64)]
 pub struct TallyVote<'info> {
     #[account(mut, seeds = [b"proposal_account".as_ref(), proposal_id.to_le_bytes().as_ref()], bump = proposal.bump)]
     pub proposal: Account<'info, Proposal>,
 
-    #[account(mut, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()], bump = vote_account_bump)]
+    #[account(mut, seeds = [b"vote_account".as_ref(), proposal_id.to_le_bytes().as_ref(), user.key.as_ref()], bump = _vote_account_bump)]
     pub vote: Account<'info, Vote>,
 
     // The token account holding the gated token for this proposal
@@ -108,9 +113,11 @@ pub struct FinalizeVote<'info> {
 
 #[account]
 pub struct CommunityVoteAccount {
-    pub total_proposal_count: u64,  // Total count of all proposals in the community
-    pub mint: Pubkey,               // The mint public key for the gated token
-    pub minimum_token_count: u64,   // The minimum amount of tokens needed to be in this community
+    pub is_nft: bool,                       // Boolean to indicate whether this is an NFT
+    pub mint: Pubkey,                       // The mint public key for the gated token
+    pub community_name: String,             // String used to describe community or verify NFT
+    pub total_proposal_count: u64,          // Total count of all proposals in the community
+    pub minimum_token_count: u64,           // The minimum amount of tokens needed to be in this community, this is primarily used for sub communities or spaces
 }
 
 #[account]
@@ -169,6 +176,7 @@ const DISCRIMINATOR_LENGTH: usize = 8;
 const PUBKEY_LENGTH: usize = 32;
 const TIMESTAMP_LENGTH: usize = 8;
 const STRING_LENGTH_PREFIX: usize = 4;
+const MAX_COMMUNITY__DESCRIPTION_LENGTH: usize = 80 * STRING_LENGTH_PREFIX;
 const MAX_PROPOSAL_TITLE_LENGTH: usize = 80 * STRING_LENGTH_PREFIX;
 const MAX_PROPOSAL_DESCRIPTION_LENGTH: usize = 1024 * STRING_LENGTH_PREFIX;
 const VOTE_COUNT_LENGTH: usize = U64_LEN;
@@ -179,8 +187,10 @@ const END_TIMESTAMP_LENGTH: usize = 16;
 
 impl CommunityVoteAccount {
     const LEN: usize = DISCRIMINATOR_LENGTH
+    + BOOL_LENGTH                       // The is NFT flag to indicate if this is an NFT community
+    + PUBKEY_LENGTH                     // Mint Key
+    + MAX_COMMUNITY__DESCRIPTION_LENGTH // The description that can be used to compare any NFT string
     + U64_LEN                           // Proposal count
-    + PUBKEY_LENGTH                     // Owner
     + U64_LEN;                          // Minimum token count
 }
 

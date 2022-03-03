@@ -14,7 +14,10 @@ mod qwestive_voting {
 
     // setup base account for anchor voting
     pub fn initialize_voting(
-        ctx: Context<InitializeVoting>, 
+        ctx: Context<InitializeVoting>,
+        _community_account_bump: u8, 
+        is_nft: bool,
+        community_name: String,
         minimum_tokens: u64) -> ProgramResult {
         let community_vote_account = &mut ctx.accounts.community_vote_account;
         //let mint = &mut ctx.accounts.mint.to_account_info();
@@ -31,6 +34,10 @@ mod qwestive_voting {
             return Err(ErrorCode::UnauthorizedTokenHolder.into());
         }
 
+        if community_name.chars().count() > 80 {
+            return Err(ErrorCode::CommunityNameIsTooLong.into());
+        }
+
         // Make sure the token account has the desired mint
         // if token_account.mint != *mint.key {
         //     return Err(ErrorCode::InvalidTokenAccount.into());
@@ -41,6 +48,8 @@ mod qwestive_voting {
             return Err(ErrorCode::InsufficientTokenBalance.into());
         }
 
+        community_vote_account.is_nft = is_nft;
+        community_vote_account.community_name = community_name;
         community_vote_account.total_proposal_count = 0;
         community_vote_account.minimum_token_count = minimum_tokens;
         community_vote_account.mint = token_account.mint;
@@ -50,6 +59,7 @@ mod qwestive_voting {
     // create a new proposal
     pub fn add_proposal(
         ctx: Context<AddProposal>,
+        _community_account_bump: u8,
         proposal_account_bump: u8,
         proposal_id: u64,
         title: String,
@@ -87,12 +97,15 @@ mod qwestive_voting {
         }
 
         // Make sure the token account holds the community mint
-        if token_account.mint != community_vote_account.mint {
+        // Temporarily disable mint check if this is an NFT community since the mint key
+        // is different for each NFT in a collection 
+        if token_account.mint != community_vote_account.mint 
+            && !community_vote_account.is_nft {
             return Err(ErrorCode::InvalidTokenAccount.into());
         }
 
         // Check that the token balance meets the minimum required balance specified by the community
-        if token_account.amount <= community_vote_account.minimum_token_count {
+        if token_account.amount < community_vote_account.minimum_token_count {
             return Err(ErrorCode::InsufficientTokenBalance.into());
         }
 
@@ -158,6 +171,7 @@ mod qwestive_voting {
     // vote on a proposal
     pub fn vote_for_proposal(
         ctx: Context<VoteForProposal>,
+        _community_account_bump: u8,
         vote_account_bump: u8,
         proposal_id: u64,
         vote_bool: bool,
@@ -188,14 +202,17 @@ mod qwestive_voting {
             return Err(ErrorCode::UnauthorizedTokenHolder.into());
         }
 
-        // Make sure the token account holds the community mint
-        if token_account.mint != community_vote_account.mint {
+           // Make sure the token account holds the community mint
+        // Temporarily disable mint check if this is an NFT community since the mint key
+        // is different for each NFT in a collection 
+        if token_account.mint != community_vote_account.mint 
+            && !community_vote_account.is_nft {
             return Err(ErrorCode::InvalidTokenAccount.into());
         }
-        
+
         // Check that the token balance meets the minimum required balance specified by the community
         // Gated token check
-        if token_account.amount <= community_vote_account.minimum_token_count {
+        if token_account.amount < community_vote_account.minimum_token_count {
             return Err(ErrorCode::InsufficientTokenBalance.into());
         }
 
@@ -205,7 +222,7 @@ mod qwestive_voting {
         }
 
         // Check that the token balance meets the minimum required balance for voting specified by proposal
-        if token_account.amount <= proposal.minimum_token_count {
+        if token_account.amount < proposal.minimum_token_count {
             return Err(ErrorCode::InsufficientTokensToVote.into());
         }
 
@@ -313,7 +330,7 @@ mod qwestive_voting {
         }
 
         // Check that the token balance meets the minimum required balance for voting specified by proposal
-        if token_account.amount <= proposal.minimum_token_count {
+        if token_account.amount < proposal.minimum_token_count {
             return Err(ErrorCode::InsufficientTokensToVote.into());
         }
 
@@ -353,7 +370,7 @@ mod qwestive_voting {
 
     pub fn tally_vote(
         ctx: Context<TallyVote>,
-        vote_account_bump: u8,
+        _vote_account_bump: u8,
         proposal_id: u64,
     ) -> ProgramResult {
         let vote_account = &mut ctx.accounts.vote;
@@ -381,7 +398,7 @@ mod qwestive_voting {
         }
 
         // Check that the token balance meets the minimum required balance for voting specified by proposal
-        if token_account.amount <= proposal.minimum_token_count {
+        if token_account.amount < proposal.minimum_token_count {
             return Err(ErrorCode::InsufficientTokensToVote.into());
         }
 
@@ -478,7 +495,7 @@ mod qwestive_voting {
         }
 
         // Check that the token balance meets the minimum required balance for voting specified by proposal
-        if token_account.amount <= proposal.minimum_token_count {
+        if token_account.amount < proposal.minimum_token_count {
             return Err(ErrorCode::InsufficientTokensToVote.into());
         }
 

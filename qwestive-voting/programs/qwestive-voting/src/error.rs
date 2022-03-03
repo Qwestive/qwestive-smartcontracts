@@ -10,6 +10,8 @@ pub enum ErrorCode  {
 	CandidateIndexOutOfBounds,
 	#[msg("You have already voted for this proposal")]
 	YouAlreadyVotedForThisProposal,
+	#[msg("Community name is too long. maximum: 80 character")]
+	CommunityNameIsTooLong,
 	#[msg("Title is too long. maximum: 80 character")]
 	TitleIsTooLong,
 	#[msg("Description is too long. maximum: 1024 character")]

@@ -8,7 +8,7 @@ export type QwestiveVoting = {
         {
           "name": "communityVoteAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenAccount",
@@ -27,6 +27,18 @@ export type QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "isNft",
+          "type": "bool"
+        },
+        {
+          "name": "communityName",
+          "type": "string"
+        },
         {
           "name": "minimumTokens",
           "type": "u64"
@@ -63,6 +75,10 @@ export type QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "proposalAccountBump",
           "type": "u8"
@@ -144,6 +160,10 @@ export type QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "voteAccountBump",
           "type": "u8"
@@ -272,12 +292,20 @@ export type QwestiveVoting = {
         "kind": "struct",
         "fields": [
           {
-            "name": "totalProposalCount",
-            "type": "u64"
+            "name": "isNft",
+            "type": "bool"
           },
           {
             "name": "mint",
             "type": "publicKey"
+          },
+          {
+            "name": "communityName",
+            "type": "string"
+          },
+          {
+            "name": "totalProposalCount",
+            "type": "u64"
           },
           {
             "name": "minimumTokenCount",
@@ -446,116 +474,121 @@ export type QwestiveVoting = {
     },
     {
       "code": 6004,
+      "name": "CommunityNameIsTooLong",
+      "msg": "Community name is too long. maximum: 80 character"
+    },
+    {
+      "code": 6005,
       "name": "TitleIsTooLong",
       "msg": "Title is too long. maximum: 80 character"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "DescriptionIsTooLong",
       "msg": "Description is too long. maximum: 1024 character"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidVotingType",
       "msg": "The weight voting type is not a valid option"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidVotingSystemType",
       "msg": "The voting system type is not a valid option"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "ProposalVotingFinalized",
       "msg": "Proposal voting is finalized no changes can be made"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "VotingTimeHasNotEnded",
       "msg": "The voting time has not ended"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "FinalizeVoteTimeHasNotEnded",
       "msg": "The time for tallying votes has not ended wait until tally time has ended"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "VotingEndTimestampTooSmall",
       "msg": "The timestamp of voting end must be greater than the current timestamp"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "FinalizeTimestampTooSmall",
       "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "ProposalTallyAlreadyStarted",
       "msg": "The proposal tally has already started"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "TallyHasNotStarted",
       "msg": "Vote tally has not started tally must begin before tallying vote"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "TallyHasStarted",
       "msg": "Vote tally has started no new votes can be submitted"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "TallyHasEnded",
       "msg": "The timing window for any vote tally has ended"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "InvalidVoteParameter",
       "msg": "The vote parameter entered is invalid for this type of voting"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
     },
     {
-      "code": 6026,
+      "code": 6027,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
     }
@@ -572,7 +605,7 @@ export const IDL: QwestiveVoting = {
         {
           "name": "communityVoteAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenAccount",
@@ -591,6 +624,18 @@ export const IDL: QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "isNft",
+          "type": "bool"
+        },
+        {
+          "name": "communityName",
+          "type": "string"
+        },
         {
           "name": "minimumTokens",
           "type": "u64"
@@ -627,6 +672,10 @@ export const IDL: QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "proposalAccountBump",
           "type": "u8"
@@ -708,6 +757,10 @@ export const IDL: QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "voteAccountBump",
           "type": "u8"
@@ -836,12 +889,20 @@ export const IDL: QwestiveVoting = {
         "kind": "struct",
         "fields": [
           {
-            "name": "totalProposalCount",
-            "type": "u64"
+            "name": "isNft",
+            "type": "bool"
           },
           {
             "name": "mint",
             "type": "publicKey"
+          },
+          {
+            "name": "communityName",
+            "type": "string"
+          },
+          {
+            "name": "totalProposalCount",
+            "type": "u64"
           },
           {
             "name": "minimumTokenCount",
@@ -1010,116 +1071,121 @@ export const IDL: QwestiveVoting = {
     },
     {
       "code": 6004,
+      "name": "CommunityNameIsTooLong",
+      "msg": "Community name is too long. maximum: 80 character"
+    },
+    {
+      "code": 6005,
       "name": "TitleIsTooLong",
       "msg": "Title is too long. maximum: 80 character"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "DescriptionIsTooLong",
       "msg": "Description is too long. maximum: 1024 character"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidVotingType",
       "msg": "The weight voting type is not a valid option"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidVotingSystemType",
       "msg": "The voting system type is not a valid option"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "ProposalHasEnded",
       "msg": "Proposal deadline is past"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "ProposalVotingFinalized",
       "msg": "Proposal voting is finalized no changes can be made"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "VotingTimeHasNotEnded",
       "msg": "The voting time has not ended"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "FinalizeVoteTimeHasNotEnded",
       "msg": "The time for tallying votes has not ended wait until tally time has ended"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "VotingEndTimestampTooSmall",
       "msg": "The timestamp of voting end must be greater than the current timestamp"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "FinalizeTimestampTooSmall",
       "msg": "The timestamp of finalizing proposal must be greater than the voting end timestamp and current timestamp"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "InsufficientTokensToVote",
       "msg": "Insufficient number of tokens to be included in voting session"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "VoteAccountAlreadyTallied",
       "msg": "This voting account has already been tallied"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "ProposalTallyAlreadyStarted",
       "msg": "The proposal tally has already started"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "TallyHasNotStarted",
       "msg": "Vote tally has not started tally must begin before tallying vote"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "TallyHasStarted",
       "msg": "Vote tally has started no new votes can be submitted"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "TallyHasEnded",
       "msg": "The timing window for any vote tally has ended"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "ProposalIsFinalized",
       "msg": "This proposal has already been finalized and no changes can be made"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "TooManyCandidates",
       "msg": "The number of candidates has exceeded the allowed amount for vote options"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "InvalidVoteParameter",
       "msg": "The vote parameter entered is invalid for this type of voting"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "InvalidTokenAccount",
       "msg": "The token account is not the correct mint"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "InsufficientTokenBalance",
       "msg": "The token account balance is less than the required balance for the community"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "UnauthorizedTokenHolder",
       "msg": "The user is not the owner of the token account"
     },
     {
-      "code": 6026,
+      "code": 6027,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
     }
