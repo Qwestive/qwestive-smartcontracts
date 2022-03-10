@@ -241,7 +241,6 @@ describe("qwestive-voting", () => {
     // Add your test here.
     const tx = await program.rpc.initializeVoting(
       communityAccountBump, 
-      false,                // Flag to indicate if this is an NFT Community
       "",                   // Empty string for non NFT community
       new anchor.BN(0),     // Minimum token needed to be in community
     {
@@ -267,7 +266,6 @@ describe("qwestive-voting", () => {
 
     const tx2 = await program.rpc.initializeVoting(
       communityBAccountBump, 
-      false,                      // Flag to indicate if this is an NFT Community
       "",                         // Empty string for non NFT community
       new anchor.BN(1),           // Minimum token needed to be in community
     {
@@ -287,11 +285,11 @@ describe("qwestive-voting", () => {
 
     assert.equal(communityA.totalProposalCount, 0);
     assert.equal(communityA.minimumTokenCount, 0);
-    assert.equal(communityA.mint.toBase58(), mintA.publicKey.toBase58());
+    assert.equal(communityA.key.toBase58(), mintA.publicKey.toBase58());
 
     assert.equal(communityB.totalProposalCount, 0);
     assert.equal(communityB.minimumTokenCount, 1);
-    assert.equal(communityB.mint.toBase58(), mintB.publicKey.toBase58());
+    assert.equal(communityB.key.toBase58(), mintB.publicKey.toBase58());
   });
 
   it("Can add a proposal!", async () => {

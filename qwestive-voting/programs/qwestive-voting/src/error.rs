@@ -58,4 +58,14 @@ pub enum ErrorCode  {
 	UnauthorizedTokenHolder,
 	#[msg("The account provided is not owned by the Qwestive Voting program")]
 	UnauthorizedAccount,
+	#[msg("The metadata account provided does not match the expected key")]
+	MetadataAccountMismatch,
+	#[msg("The metadata account is not initialized")]
+	MetadataAccountNotInitialized,
+	#[msg("The NFT token creator does not match the expected creator")]
+	CreatorKeyMismatch,
+	#[msg("The NFT creator key is not verified")]
+	CreatorKeyIsNotVerified,
+	#[msg("The collection name does not match the expected name")]
+	CollectionNameMismatch,
 }

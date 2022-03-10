@@ -32,16 +32,58 @@ export type QwestiveVoting = {
           "type": "u8"
         },
         {
-          "name": "isNft",
-          "type": "bool"
-        },
-        {
           "name": "communityName",
           "type": "string"
         },
         {
           "name": "minimumTokens",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initializeNftVoting",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
         }
       ]
     },
@@ -56,6 +98,101 @@ export type QwestiveVoting = {
         {
           "name": "proposal",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "minimumTokenCount",
+          "type": "u64"
+        },
+        {
+          "name": "voteSystemType",
+          "type": "u8"
+        },
+        {
+          "name": "threshold",
+          "type": "u64"
+        },
+        {
+          "name": "votingType",
+          "type": "u8"
+        },
+        {
+          "name": "totalCandidates",
+          "type": "u64"
+        },
+        {
+          "name": "votingEndTimestamp",
+          "type": "u128"
+        },
+        {
+          "name": "finalizeVoteEndTimestamp",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "addNftProposal",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -183,6 +320,78 @@ export type QwestiveVoting = {
       ]
     },
     {
+      "name": "voteForNftProposal",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        },
+        {
+          "name": "voteBool",
+          "type": "bool"
+        },
+        {
+          "name": "candidate",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "beginTally",
       "accounts": [
         {
@@ -207,6 +416,61 @@ export type QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "beginNftTally",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "proposalId",
           "type": "u64"
@@ -254,6 +518,70 @@ export type QwestiveVoting = {
       ]
     },
     {
+      "name": "tallyNftVote",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "finalizeVote",
       "accounts": [
         {
@@ -283,6 +611,61 @@ export type QwestiveVoting = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "finalizeNftVote",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -296,7 +679,7 @@ export type QwestiveVoting = {
             "type": "bool"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -340,7 +723,7 @@ export type QwestiveVoting = {
             "type": "string"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -436,7 +819,7 @@ export type QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -591,6 +974,31 @@ export type QwestiveVoting = {
       "code": 6027,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
+    },
+    {
+      "code": 6028,
+      "name": "MetadataAccountMismatch",
+      "msg": "The metadata account provided does not match the expected key"
+    },
+    {
+      "code": 6029,
+      "name": "MetadataAccountNotInitialized",
+      "msg": "The metadata account is not initialized"
+    },
+    {
+      "code": 6030,
+      "name": "CreatorKeyMismatch",
+      "msg": "The NFT token creator does not match the expected creator"
+    },
+    {
+      "code": 6031,
+      "name": "CreatorKeyIsNotVerified",
+      "msg": "The NFT creator key is not verified"
+    },
+    {
+      "code": 6032,
+      "name": "CollectionNameMismatch",
+      "msg": "The collection name does not match the expected name"
     }
   ]
 };
@@ -629,16 +1037,58 @@ export const IDL: QwestiveVoting = {
           "type": "u8"
         },
         {
-          "name": "isNft",
-          "type": "bool"
-        },
-        {
           "name": "communityName",
           "type": "string"
         },
         {
           "name": "minimumTokens",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initializeNftVoting",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
         }
       ]
     },
@@ -653,6 +1103,101 @@ export const IDL: QwestiveVoting = {
         {
           "name": "proposal",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "minimumTokenCount",
+          "type": "u64"
+        },
+        {
+          "name": "voteSystemType",
+          "type": "u8"
+        },
+        {
+          "name": "threshold",
+          "type": "u64"
+        },
+        {
+          "name": "votingType",
+          "type": "u8"
+        },
+        {
+          "name": "totalCandidates",
+          "type": "u64"
+        },
+        {
+          "name": "votingEndTimestamp",
+          "type": "u128"
+        },
+        {
+          "name": "finalizeVoteEndTimestamp",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "addNftProposal",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -780,6 +1325,78 @@ export const IDL: QwestiveVoting = {
       ]
     },
     {
+      "name": "voteForNftProposal",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        },
+        {
+          "name": "voteBool",
+          "type": "bool"
+        },
+        {
+          "name": "candidate",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "beginTally",
       "accounts": [
         {
@@ -804,6 +1421,61 @@ export const IDL: QwestiveVoting = {
         }
       ],
       "args": [
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "beginNftTally",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
         {
           "name": "proposalId",
           "type": "u64"
@@ -851,6 +1523,70 @@ export const IDL: QwestiveVoting = {
       ]
     },
     {
+      "name": "tallyNftVote",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "voteAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "finalizeVote",
       "accounts": [
         {
@@ -880,6 +1616,61 @@ export const IDL: QwestiveVoting = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "finalizeNftVote",
+      "accounts": [
+        {
+          "name": "communityVoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMintAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadataAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "communityAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "proposalId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -893,7 +1684,7 @@ export const IDL: QwestiveVoting = {
             "type": "bool"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -937,7 +1728,7 @@ export const IDL: QwestiveVoting = {
             "type": "string"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -1033,7 +1824,7 @@ export const IDL: QwestiveVoting = {
             "type": "publicKey"
           },
           {
-            "name": "mint",
+            "name": "key",
             "type": "publicKey"
           },
           {
@@ -1188,6 +1979,31 @@ export const IDL: QwestiveVoting = {
       "code": 6027,
       "name": "UnauthorizedAccount",
       "msg": "The account provided is not owned by the Qwestive Voting program"
+    },
+    {
+      "code": 6028,
+      "name": "MetadataAccountMismatch",
+      "msg": "The metadata account provided does not match the expected key"
+    },
+    {
+      "code": 6029,
+      "name": "MetadataAccountNotInitialized",
+      "msg": "The metadata account is not initialized"
+    },
+    {
+      "code": 6030,
+      "name": "CreatorKeyMismatch",
+      "msg": "The NFT token creator does not match the expected creator"
+    },
+    {
+      "code": 6031,
+      "name": "CreatorKeyIsNotVerified",
+      "msg": "The NFT creator key is not verified"
+    },
+    {
+      "code": 6032,
+      "name": "CollectionNameMismatch",
+      "msg": "The collection name does not match the expected name"
     }
   ]
 };
